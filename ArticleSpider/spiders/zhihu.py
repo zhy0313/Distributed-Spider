@@ -2,16 +2,16 @@
 __author__ = 'pengtuo'
 
 
-import re
 import json
 import scrapy
-from scrapy.selector import Selector
-from ArticleSpider.utils.common import get_captcha
+import os
+import time
 
 class ZhihuSpider(scrapy.Spider):
     name = "zhihu"
     allowed_domains = ["https://www.zhihu.com"]
-    start_urls = ['http://https://www.zhihu.com/']
+    start_urls = ['https://www.zhihu.com/']
+    login_url = "https://www.zhihu.com/login/phone_num"
 
     headers = {
         'Accept':'*/*',
@@ -28,32 +28,56 @@ class ZhihuSpider(scrapy.Spider):
         pass
 
     def start_requests(self):
-        return [scrapy.Request("https://www.zhihu.com/#signin", headers=self.headers, callback=self.login)]
-        
+        return [scrapy.Request("https://www.zhihu.com/#signin",
+                               meta={"cookiejar": 1},
+                               headers=self.headers,
+                               callback=self.request_captcha)]
+
+    def request_captcha(self, response):
+        # 获取_xsrf值
+        _xsrf = response.css('input[name="_xsrf"]::attr(value)').extract()[0]
+        # 获得验证码的地址
+        t = str(int(1000 * time.time()))[0:13]
+        captcha_url = 'https://www.zhihu.com/captcha.gif?r=' + t + '&type=login'
+        # 获取请求
+        yield scrapy.Request(
+            url=captcha_url,
+            headers=self.headers,
+            meta={
+                "cookiejar": response.meta["cookiejar"],
+                "_xsrf": _xsrf
+            },
+            callback=self.login,
+            dont_filter=True
+        )
+
     def login(self, response):
-        captcha_bool = get_captcha(self.allowed_domains[0])
-        xsrf=''
-        xsrf = Selector(response).xpath('//input[@name="_xsrf"]/@value').extract()[0]
-        if xsrf:
-            post_url = "https://www.zhihu.com/login/phone_num"
-            post_data = {
-                "_xsrf": xsrf,
-                "phone_num": "15652915029",
-                "password": "admin123",
-                'remember_me': 'true',
-                'captcha': input('Input the captcha:')
-            }
-            return [scrapy.FormRequest(
-                url=post_url,
-                formdata=post_data,
-                headers=self.headers,
-                callback=self.check_login,
-                dont_filter=True
-            )]
-        print('未能获得xsrf')
+        # 下载验证码
+        with open("captcha.gif", "wb") as fp:
+            fp.write(response.body)
+        # 打开验证码
+        os.system('open captcha.gif')
+        # 输入验证码
+        captcha = input('Input the captcha:')
+        # 输入账号和密码
+        yield scrapy.FormRequest(
+            url=self.login_url,
+            headers=self.headers,
+            formdata={
+                "phone_num": "xxx",
+                "password": "xxx",
+                "_xsrf": response.meta["_xsrf"],
+                "remember_me": "true",
+                "captcha": captcha
+            },
+            meta={
+                "cookiejar": response.meta["cookiejar"],
+            },
+            callback=self.check_login,
+            dont_filter=True
+        )
 
     def check_login(self, response):
-        rps = response
         text_json = json.loads(response.text)
         if text_json["r"] != 0:
             print("Login Failed!")
