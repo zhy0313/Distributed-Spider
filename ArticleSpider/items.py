@@ -22,14 +22,6 @@ class ArticleItemLoader(ItemLoader):
     default_output_processor=TakeFirst()
 
 
-# def date_convert(value):
-#     try:
-#         create_date = datetime.datetime.strptime(value, '%Y/%m/%d').date()
-#     except Exception as e:
-#         create_date = datetime.datetime.now().date()
-#     return create_date
-
-
 def remove_comment_tags(value):
     if "评论" in value:
         return ""
@@ -80,3 +72,27 @@ class JobBoleArticleItem(scrapy.Item):
         output_processor=Join(" ")
     )
     content = scrapy.Field()
+
+class ZhihuQuestionItem(scrapy.Item):
+    question_id = scrapy.Field()
+    topics = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    content = scrapy.Field()
+    answers_num = scrapy.Field()
+    comments_num = scrapy.Field()
+    watch_users_num = scrapy.Field()
+    clicked_num = scrapy.Field()
+
+
+class ZhihuAnswerItem(scrapy.Item):
+    answer_id = scrapy.Field()
+    url = scrapy.Field()
+    question_id = scrapy.Field()
+    author_id = scrapy.Field()
+    content = scrapy.Field()
+    praise_num = scrapy.Field()
+    comments_num = scrapy.Field()
+    create_time = scrapy.Field()
+    update_time = scrapy.Field()
+
