@@ -101,8 +101,10 @@ class ZhihuSpider(scrapy.Spider):
                 question_id = match_obj.group(2)
                 yield scrapy.Request(request_url, headers=self.headers, meta={'question_id': question_id},
                                      dont_filter=True, callback=self.parse_question)
+                # break
             else:
                 yield scrapy.Request(url, headers=self.headers, dont_filter=True, callback=self.parse)
+                # pass
 
     def parse_question(self, response):
         item_loader = ItemLoader(item=ZhihuQuestionItem(), response=response)

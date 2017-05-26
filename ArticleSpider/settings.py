@@ -81,7 +81,7 @@ ITEM_PIPELINES = {
     # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
     # 'ArticleSpider.pipelines.JsonWithEncodingPipeline': 2,
     # 'ArticleSpider.pipelines.MysqlStorePipeline': 3,
-    # 'ArticleSpider.pipelines.MysqlTwistedStorePipeline': 4
+    'ArticleSpider.pipelines.MysqlTwistedStorePipeline': 4
 }
 IMAGES_URLS_FIELD = "front_image_url"
 project_dir = get_file_dir()

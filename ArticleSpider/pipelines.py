@@ -67,41 +67,28 @@ class MysqlTwistedStorePipeline(object):
     @classmethod
     def from_settings(cls, settings):
         db_args = dict(
-            host= settings['MYSQL_HOST'],
-            db= settings['MYSQL_DBNAME'],
-            user= settings['MYSQL_USER'],
-            passwd= settings['MYSQL_PASSWD'],
+            host=settings['MYSQL_HOST'],
+            db=settings['MYSQL_DBNAME'],
+            user=settings['MYSQL_USER'],
+            passwd=settings['MYSQL_PASSWD'],
             charset='utf8',
-            cursorclass= MySQLdb.cursors.DictCursor,
-            use_unicode= True,
+            cursorclass=MySQLdb.cursors.DictCursor,
+            use_unicode=True,
         )
         dbpool = adbapi.ConnectionPool('MySQLdb', **db_args)
         return cls(dbpool)
 
     def process_item(self, item, spider):
         query = self.dbpool.runInteraction(self.do_upinsert, item)
-        query.addErrback(self.handle_error)
-        # d.addBoth(lambda _: item)
+        query.addErrback(self.handle_error, item, spider)
 
     def do_upinsert(self, cursor, item):
-        insert_sql = """
-            insert into article_spider
-            (title, create_date, url, url_object_id, front_image_url, front_image_path, praise_nums, fav_nums, comment_nums, tags, content)
-            values 
-            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(
-            insert_sql, 
-            (
-                item['title'], item['create_date'], item['url'], item['url_id_md5'], 
-                item['front_image_url'][0], item['fornt_image_path'], 
-                item['praise_nums'], item['fav_nums'],item['comment_nums'], item['tags'], item['content']
-            )
-        )
+        insert_sql, params = item.get_insert_sql()
+        cursor.execute(insert_sql, params)
 
-    def handle_error(self, failure):
-        print ('******************** ERROR **********************')
-        print (failure)
+    def handle_error(self, failure, item, spider):
+        print('******************** ERROR **********************')
+        print(failure)
 
 
 class ArticleImagePipeline(ImagesPipeline):

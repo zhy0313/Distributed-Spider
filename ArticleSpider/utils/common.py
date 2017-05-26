@@ -3,6 +3,7 @@ __author__ = 'pengtuo'
 
 
 import os
+import re
 import hashlib
 
 
@@ -27,3 +28,12 @@ def get_md5(url):
     m = hashlib.md5()
     m.update(url)
     return m.hexdigest()
+
+
+def extract_num(value):
+    march_re = re.match(r".*(\d+).*", value)
+    if march_re:
+        nums = int(march_re.group(1))
+    else:
+        nums = 0
+    return nums
