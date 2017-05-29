@@ -88,6 +88,7 @@ class MysqlTwistedStorePipeline(object):
 
     def handle_error(self, failure, item, spider):
         print('******************** ERROR **********************')
+        print(item['url'])
         print(failure)
 
 

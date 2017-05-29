@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-__author__ = 'pengtuo'
-
-
 import scrapy
 from scrapy.http import Request
 from urllib import parse

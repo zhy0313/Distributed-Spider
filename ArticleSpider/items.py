@@ -22,6 +22,10 @@ class ArticleItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
 
+class LagouItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+
 def remove_comment_tags(value):
     if "评论" in value:
         return ""
@@ -38,6 +42,7 @@ def deal_create_date(value):
     return create_date
 
 
+# FIXME：文章内容的入库有时会报错，暂时认为是utf8编码长度问题，不影响入库
 class JobBoleArticleItem(scrapy.Item):
     title = scrapy.Field()
     create_date = scrapy.Field(
@@ -72,8 +77,8 @@ class JobBoleArticleItem(scrapy.Item):
             (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         params = (self['title'], self['create_date'], self['url'], self['url_id_md5'], 
-                self['front_image_url'][0], self['fornt_image_path'], 
-                self['praise_nums'], self['fav_nums'],self['comment_nums'], self['tags'], self['content'])
+                  self['front_image_url'][0], self['fornt_image_path'],
+                  self['praise_nums'], self['fav_nums'], self['comment_nums'], self['tags'], self['content'])
 
         return insert_sql, params
 
@@ -136,5 +141,48 @@ class ZhihuAnswerItem(scrapy.Item):
 
         params = (self['answer_id'], self['url'], self['question_id'], self['author_id'],
                 self['content'], self['praise_num'], self['comments_num'], create_time, update_time)
+
+        return insert_sql, params
+
+def remove_splash(value):
+    return value.replace("/", "")
+
+
+class LagouJobItem(scrapy.Item):
+    title = scrapy.Field()
+    url = scrapy.Field()
+    url_object_id = scrapy.Field()
+    salary = scrapy.Field()
+    job_city = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    work_years = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    degree_need = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    job_type = scrapy.Field()
+    publish_time = scrapy.Field()
+    tags = scrapy.Field(
+        output_processor=Join(",")
+    )
+    job_advantage = scrapy.Field()
+    job_desc = scrapy.Field()
+    company_url = scrapy.Field()
+    company_name = scrapy.Field()
+
+    def get_insert_sql(self):
+        insert_sql = """
+            insert into lagou_job
+            (url, url_object_id, title, salary, job_city, work_years, degree_need, job_type, publish_time, tags, 
+            job_advantage, job_desc, company_url, company_name)
+            values 
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+
+        params = (self['url'], self['url_object_id'], self['title'], self['salary'], self['job_city'], self['work_years'],
+                  self['degree_need'], self['job_type'], self['publish_time'], self['tags'], self['job_advantage'],
+                  self['job_desc'], self['company_url'], self['company_name'])
 
         return insert_sql, params

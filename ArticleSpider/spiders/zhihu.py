@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-__author__ = 'pengtuo'
-
-
 import re
 import json
 import scrapy
@@ -11,6 +8,8 @@ from urllib import parse
 from scrapy.loader import ItemLoader
 from ArticleSpider.items import ZhihuAnswerItem, ZhihuQuestionItem
 
+
+# FIXME:爬取的问题与答案详细信息入库后都有信息重复现象，待查
 class ZhihuSpider(scrapy.Spider):
     name = "zhihu"
     allowed_domains = ["https://www.zhihu.com"]
@@ -65,8 +64,8 @@ class ZhihuSpider(scrapy.Spider):
             url=self.login_url,
             headers=self.headers,
             formdata={
-                "phone_num": "15652915029",
-                "password": "admin123",
+                "phone_num": "xxx",
+                "password": "xxx",
                 "_xsrf": response.meta["_xsrf"],
                 "remember_me": "true",
                 "captcha": captcha
