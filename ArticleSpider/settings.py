@@ -64,7 +64,7 @@ COOKIES_ENABLED = True
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'ArticleSpider.middlewares.RandomUserAgentMiddleware': 25,
+   'ArticleSpider.middlewares.RandomUserAgentMiddleware': 543,
    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
 }
 
@@ -79,7 +79,7 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     'ArticleSpider.pipelines.ArticlespiderPipeline': 300,
     # 'scrapy.pipelines.images.ImagesPipeline': 1,
-    # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
+    'ArticleSpider.pipelines.ArticleImagePipeline': 1,
     # 'ArticleSpider.pipelines.JsonWithEncodingPipeline': 2,
     # 'ArticleSpider.pipelines.MysqlStorePipeline': 3,
     'ArticleSpider.pipelines.MysqlTwistedStorePipeline': 4
@@ -87,6 +87,8 @@ ITEM_PIPELINES = {
 IMAGES_URLS_FIELD = "front_image_url"
 project_dir = get_file_dir()
 IMAGES_STORE = os.path.join(project_dir, 'images')
+
+RANDOM_UA_TYPE = 'random'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
